@@ -190,7 +190,8 @@ cloud_run = gcp.cloudrunv2.Service(
                     container_port=8080,
                 ),
                 resources=gcp.cloudrunv2.ServiceTemplateContainerResourcesArgs(
-                    limits={"cpu": "1", "memory": "256Mi"},
+                    # Cloud Run v2 requires >= 512Mi when CPU is always allocated
+                    limits={"cpu": "1", "memory": "512Mi"},
                 ),
             )
         ],
