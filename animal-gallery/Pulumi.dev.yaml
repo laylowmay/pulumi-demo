@@ -1,0 +1,4 @@
+config:
+  animal-gallery:animal: cat
+environment:
+  - animal-gallery/gcp-credentials
