@@ -1,0 +1,4 @@
+config:
+  animal-gallery:animal: cat
+  gcp:project: pulumi-test1-496008
+  gcp:region: us-central1
