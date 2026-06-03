@@ -1,0 +1,11 @@
+name: worldclock-demo
+description: Deploys a Cloud Run service that shows the current local time for any city
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-python
