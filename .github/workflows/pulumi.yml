@@ -1,0 +1,101 @@
+name: Pulumi
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Prevent concurrent deployments on the same branch — canceling a
+# mid-run deployment can leave infrastructure in a partial state.
+concurrency:
+  group: pulumi-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PULUMI_BACKEND_URL: gs://your-pulumi-state-bucket
+  # If using KMS (Option B), omit PULUMI_CONFIG_PASSPHRASE entirely
+  # and the stack will use the KMS key automatically.
+
+jobs:
+  # ── Preview on Pull Requests ──────────────────────────────────────────
+  preview:
+    name: Pulumi Preview
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      id-token: write       # Required for OIDC token generation
+      pull-requests: write  # Required to post preview comment on the PR
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      # Adjust this block to match your project's language runtime.
+      # Python example:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # TypeScript example (uncomment and remove Python block above):
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: "22"
+      # - run: npm ci
+
+      - name: Pulumi Preview
+        uses: pulumi/actions@v7
+        with:
+          command: preview
+          stack-name: dev
+          comment-on-pr: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+  # ── Deploy on push to main ────────────────────────────────────────────
+  deploy:
+    name: Pulumi Deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC token generation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      # Adjust runtime block to match your project:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Pulumi Up
+        uses: pulumi/actions@v7
+        with:
+          command: up
+          stack-name: dev
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
