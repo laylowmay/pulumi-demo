@@ -1,3 +1,4 @@
+secretsprovider: gcpkms://projects/YOUR_PROJECT_ID/locations/us-central1/keyRings/pulumi-keyring/cryptoKeys/pulumi-secrets-key
 config:
   animal-gallery:animal: cat
   gcp:project: pulumi-test1-496008
