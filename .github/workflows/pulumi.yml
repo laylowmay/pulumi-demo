@@ -7,6 +7,12 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "yes" to confirm destroy'
+        required: true
+        default: ''
 
 concurrency:
   group: pulumi-${{ github.ref }}
@@ -99,3 +105,42 @@ jobs:
           stack-name: dev
           cloud-url: gs://your-pulumi-state-bucket
           # secrets-provider intentionally removed — stack already initialized above
+
+  # ── Manual Destroy ───────────────────────────────────────────────────
+  destroy:
+    name: Pulumi Destroy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'yes'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Initialize Pulumi stack
+        run: pulumi stack select dev
+        env:
+          PULUMI_BACKEND_URL: gs://your-pulumi-state-bucket
+
+      - name: Pulumi Destroy
+        uses: pulumi/actions@v7
+        with:
+          command: destroy
+          stack-name: dev
+          cloud-url: gs://your-pulumi-state-bucket
