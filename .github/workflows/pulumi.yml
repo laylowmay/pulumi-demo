@@ -60,10 +60,13 @@ jobs:
         with:
           command: preview
           stack-name: dev
+          upsert: true
           comment-on-pr: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          secrets-provider: "gcpkms://projects/${{ secrets.GCP_PROJECT_ID }}/locations/us-central1/keyRings/pulumi-keyring/cryptoKeys/pulumi-secrets-key"
         env:
-          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          PULUMI_BACKEND_URL: gs://your-pulumi-state-bucket
+          #PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
   # ── Deploy on push to main ────────────────────────────────────────────
   deploy:
@@ -97,5 +100,8 @@ jobs:
         with:
           command: up
           stack-name: dev
+          upsert: true
+          secrets-provider: "gcpkms://projects/${{ secrets.GCP_PROJECT_ID }}/locations/us-central1/keyRings/pulumi-keyring/cryptoKeys/pulumi-secrets-key"
         env:
-          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          PULUMI_BACKEND_URL: gs://your-pulumi-state-bucket
+          #PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
