@@ -1,4 +1,3 @@
 config:
   animal-gallery:animal: cat
-environment:
-  - animal-gallery/gcp-credentials
+  gcp:project: pulumi-test1-496008
