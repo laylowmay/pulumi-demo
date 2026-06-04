@@ -1,0 +1,4 @@
+environment:
+  - worldclock-demo/gcp-credentials
+config:
+  worldclock-demo:city: London
