@@ -96,6 +96,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Initialize Pulumi stack
+        run: |
+          pulumi login gs://your-pulumi-state-bucket
+          pulumi stack select dev 2>/dev/null || \
+            pulumi stack init dev \
+              --secrets-provider="gcpkms://projects/${{ secrets.GCP_PROJECT_ID }}/locations/us-central1/keyRings/pulumi-keyring/cryptoKeys/pulumi-secrets-key"
+        env:
+          PULUMI_BACKEND_URL: gs://your-pulumi-state-bucket
+
       - name: Pulumi Up
         uses: pulumi/actions@v7
         with:
