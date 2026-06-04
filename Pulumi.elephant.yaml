@@ -1,0 +1,4 @@
+environment:
+  - animal-gallery/gcp-credentials
+config:
+  animal-gallery:animal: elephant

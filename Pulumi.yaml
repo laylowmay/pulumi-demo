@@ -1,0 +1,13 @@
+name: animal-gallery
+description: Downloads an animal photo into GCS and serves it via Cloud Run
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-python
+backend:
+  url: gs://your-pulumi-state-bucket
