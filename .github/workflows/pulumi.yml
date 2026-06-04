@@ -60,7 +60,6 @@ jobs:
         with:
           command: preview
           stack-name: dev
-          upsert: true
           cloud-url: gs://your-pulumi-state-bucket
           comment-on-pr: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -98,7 +97,6 @@ jobs:
 
       - name: Initialize Pulumi stack
         run: |
-          pulumi login gs://your-pulumi-state-bucket
           pulumi stack select dev 2>/dev/null || \
             pulumi stack init dev \
               --secrets-provider="gcpkms://projects/${{ secrets.GCP_PROJECT_ID }}/locations/us-central1/keyRings/pulumi-keyring/cryptoKeys/pulumi-secrets-key"
@@ -110,7 +108,6 @@ jobs:
         with:
           command: up
           stack-name: dev
-          upsert: true
           cloud-url: gs://your-pulumi-state-bucket
           secrets-provider: "gcpkms://projects/${{ secrets.GCP_PROJECT_ID }}/locations/us-central1/keyRings/pulumi-keyring/cryptoKeys/pulumi-secrets-key"
         env:
